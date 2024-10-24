@@ -9,6 +9,7 @@ import com.scaler.userservice.Exceptions.TokenIsInvalidOrNotExistsException;
 import com.scaler.userservice.Models.Token;
 import com.scaler.userservice.Models.User;
 import com.scaler.userservice.Services.UserService;
+import lombok.NonNull;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -39,5 +40,14 @@ public class UserController {
     public ResponseEntity<Token> logOUt(@RequestBody LogOutRequestDTO logOutRequestDTO) throws TokenIsInvalidOrNotExistsException {
         Token token = userService.logOut(logOutRequestDTO.getToken());
         return ResponseEntity.status(HttpStatus.OK).body(token);
+    }
+
+    @PostMapping("/validate/{token}" )
+    public ResponseEntity<User> validateToken(@PathVariable("token") @NonNull String token) {
+        User user = userService.validateToken(token);
+        if(user==null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 }

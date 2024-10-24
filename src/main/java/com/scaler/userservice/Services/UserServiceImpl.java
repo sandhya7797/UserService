@@ -6,7 +6,10 @@ import com.scaler.userservice.Models.Token;
 import com.scaler.userservice.Models.User;
 import com.scaler.userservice.Repositories.TokenRepository;
 import com.scaler.userservice.Repositories.UserRepository;
+import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -88,5 +91,17 @@ public class UserServiceImpl implements UserService {
         tokenRepository.save(savedToken);
 
         return savedToken;
+    }
+
+    @Override
+    public User validateToken(@NonNull String token) {
+
+        Optional<Token> tokenOptional = tokenRepository.findByValueAndDeletedEqualsAndExpireAtIsGreaterThanEqual( token, false, new Date());
+
+        if(tokenOptional.isEmpty()) {
+            return null;
+        }
+
+        return tokenOptional.get().getUser();
     }
 }

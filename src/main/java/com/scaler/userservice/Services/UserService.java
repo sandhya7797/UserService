@@ -5,6 +5,7 @@ import com.scaler.userservice.Exceptions.EmailNotExistsException;
 import com.scaler.userservice.Exceptions.TokenIsInvalidOrNotExistsException;
 import com.scaler.userservice.Models.Token;
 import com.scaler.userservice.Models.User;
+import lombok.NonNull;
 
 
 public interface UserService {
@@ -15,4 +16,5 @@ public interface UserService {
 
     Token logOut(String token) throws TokenIsInvalidOrNotExistsException;
 
+    User validateToken(@NonNull String token);
 }
