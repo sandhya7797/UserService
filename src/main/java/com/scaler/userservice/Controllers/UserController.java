@@ -22,19 +22,17 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/signup")
+    @PostMapping
     public ResponseEntity<User> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
         User user =  userService.signUp(signUpRequestDTO.getEmail(), signUpRequestDTO.getPassword(), signUpRequestDTO.getName());
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    @PostMapping("/login")
     public ResponseEntity<Token> login(@RequestBody LoginRequestDTO loginRequestDTO) {
         Token token = userService.login(loginRequestDTO.getEmail(),loginRequestDTO.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
-    @DeleteMapping("/{email}")
     public ResponseEntity<Token> logOUt(LogOutRequestDTO logOutRequestDTO) throws TokenNotExistsException {
         Token token = userService.logOut(logOutRequestDTO.getToken());
         return ResponseEntity.status(HttpStatus.OK).body(token);

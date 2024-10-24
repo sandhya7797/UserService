@@ -6,6 +6,7 @@ import com.scaler.userservice.Models.User;
 import com.scaler.userservice.Repositories.TokenRepository;
 import com.scaler.userservice.Repositories.UserRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -17,9 +18,12 @@ public class UserServiceImpl implements UserService {
 
     private TokenRepository tokenRepository;
 
-    public UserServiceImpl(UserRepository userRepository, TokenRepository tokenRepository) {
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+
+    public UserServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
@@ -28,7 +32,7 @@ public class UserServiceImpl implements UserService {
         User newUser = new User();
 
         newUser.setEmail(email);
-        newUser.setHashPassword(password);
+        newUser.setHashPassword(bCryptPasswordEncoder.encode(password));
         newUser.setName(name);
 
         return userRepository.save(newUser);
