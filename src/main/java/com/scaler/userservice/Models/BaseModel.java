@@ -22,4 +22,6 @@ public class BaseModel {
 
     private Date updatedAt;
 
+    private boolean deleted;
+
 }

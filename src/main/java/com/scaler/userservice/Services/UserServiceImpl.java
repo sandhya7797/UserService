@@ -1,14 +1,18 @@
 package com.scaler.userservice.Services;
 
-import com.scaler.userservice.Exceptions.TokenNotExistsException;
+import com.scaler.userservice.Exceptions.EmailNotExistsException;
+import com.scaler.userservice.Exceptions.TokenIsInvalidOrNotExistsException;
 import com.scaler.userservice.Models.Token;
 import com.scaler.userservice.Models.User;
 import com.scaler.userservice.Repositories.TokenRepository;
 import com.scaler.userservice.Repositories.UserRepository;
-import org.springframework.http.ResponseEntity;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Optional;
 
 @Service
@@ -20,10 +24,14 @@ public class UserServiceImpl implements UserService {
 
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    private RandomStringUtils randomStringUtils;
+
+    public UserServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
+                           RandomStringUtils randomStringUtils) {
         this.userRepository = userRepository;
         this.tokenRepository = tokenRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.randomStringUtils = randomStringUtils;
     }
 
     @Override
@@ -39,11 +47,25 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Token login(String email, String password) {
+    public Token login(String email, String password) throws EmailNotExistsException {
+
+        Optional<User> userOptional = userRepository.findByEmail(email);
+
+        if(userOptional.isEmpty()) {
+            throw new EmailNotExistsException("Email not exists!");
+        }
+
+        User savedUser = userOptional.get();
+
+        LocalDate today = LocalDate.now();
+        LocalDate dateIn30Days = today.plusDays(30);
+        Date expiryDate = Date.from(dateIn30Days.atStartOfDay(ZoneId.systemDefault()).toInstant());
 
         Token newToken = new Token();
 
-        newToken.setToken("abc");
+        newToken.setValue(randomStringUtils.nextAlphanumeric(15));
+        newToken.setExpireAt(expiryDate);
+        newToken.setUser(savedUser);
 
         Token savedToken = tokenRepository.save(newToken);
 
@@ -51,15 +73,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Token logOut(Token token) throws TokenNotExistsException {
-        Optional<Token> tokenOptional = tokenRepository.findById(token.getId());
+    public Token logOut(String token) throws TokenIsInvalidOrNotExistsException {
 
-        if(tokenOptional.isEmpty()) {
-            throw new TokenNotExistsException("Token doesn't exists in database");
+        Optional<Token> tokenOptional = tokenRepository.findByValueAndDeletedEquals(token, false);
+
+        if(tokenOptional.isEmpty() || tokenOptional.get().isDeleted()) {
+            throw new TokenIsInvalidOrNotExistsException("Token is invalid or doesn't exists in database");
         }
 
-        tokenRepository.delete(token);
+        Token savedToken = tokenOptional.get();
 
-        return token;
+        savedToken.setDeleted(true);
+
+        tokenRepository.save(savedToken);
+
+        return savedToken;
     }
 }

@@ -4,7 +4,8 @@ package com.scaler.userservice.Controllers;
 import com.scaler.userservice.DTOs.LogOutRequestDTO;
 import com.scaler.userservice.DTOs.LoginRequestDTO;
 import com.scaler.userservice.DTOs.SignUpRequestDTO;
-import com.scaler.userservice.Exceptions.TokenNotExistsException;
+import com.scaler.userservice.Exceptions.EmailNotExistsException;
+import com.scaler.userservice.Exceptions.TokenIsInvalidOrNotExistsException;
 import com.scaler.userservice.Models.Token;
 import com.scaler.userservice.Models.User;
 import com.scaler.userservice.Services.UserService;
@@ -22,18 +23,20 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping
+    @PostMapping("/signup")
     public ResponseEntity<User> signUp(@RequestBody SignUpRequestDTO signUpRequestDTO) {
         User user =  userService.signUp(signUpRequestDTO.getEmail(), signUpRequestDTO.getPassword(), signUpRequestDTO.getName());
         return ResponseEntity.status(HttpStatus.OK).body(user);
     }
 
-    public ResponseEntity<Token> login(@RequestBody LoginRequestDTO loginRequestDTO) {
+    @PostMapping("/login")
+    public ResponseEntity<Token> login(@RequestBody LoginRequestDTO loginRequestDTO) throws EmailNotExistsException {
         Token token = userService.login(loginRequestDTO.getEmail(),loginRequestDTO.getPassword());
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }
 
-    public ResponseEntity<Token> logOUt(LogOutRequestDTO logOutRequestDTO) throws TokenNotExistsException {
+    @PostMapping("/logout")
+    public ResponseEntity<Token> logOUt(@RequestBody LogOutRequestDTO logOutRequestDTO) throws TokenIsInvalidOrNotExistsException {
         Token token = userService.logOut(logOutRequestDTO.getToken());
         return ResponseEntity.status(HttpStatus.OK).body(token);
     }

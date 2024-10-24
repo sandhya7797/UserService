@@ -1,7 +1,6 @@
 package com.scaler.userservice.DTOs;
 
 
-import com.scaler.userservice.Models.Token;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,5 +8,5 @@ import lombok.Setter;
 @Setter
 public class LogOutRequestDTO {
 
-    private Token token;
+    private String token;
 }

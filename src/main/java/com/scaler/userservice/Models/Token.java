@@ -13,7 +13,7 @@ import java.util.Date;
 @Entity(name = "tokens")
 public class Token extends BaseModel {
 
-    private String token;
+    private String value;
 
     private Date expireAt;
 
