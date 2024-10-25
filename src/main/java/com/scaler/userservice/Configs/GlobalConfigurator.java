@@ -17,4 +17,5 @@ public class GlobalConfigurator {
     public RandomStringUtils generateRandomString() {
         return new RandomStringUtils();
     }
+
 }

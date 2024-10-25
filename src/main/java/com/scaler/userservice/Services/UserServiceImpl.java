@@ -8,8 +8,6 @@ import com.scaler.userservice.Repositories.TokenRepository;
 import com.scaler.userservice.Repositories.UserRepository;
 import lombok.NonNull;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +26,7 @@ public class UserServiceImpl implements UserService {
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
     private RandomStringUtils randomStringUtils;
+
 
     public UserServiceImpl(UserRepository userRepository, TokenRepository tokenRepository, BCryptPasswordEncoder bCryptPasswordEncoder,
                            RandomStringUtils randomStringUtils) {
@@ -54,8 +53,8 @@ public class UserServiceImpl implements UserService {
 
         Optional<User> userOptional = userRepository.findByEmail(email);
 
-        if(userOptional.isEmpty()) {
-            throw new EmailNotExistsException("Email not exists!");
+        if(userOptional.isEmpty() || !bCryptPasswordEncoder.matches(password, userOptional.get().getHashPassword())) {
+            throw new EmailNotExistsException("Email or Password is incorrect!");
         }
 
         User savedUser = userOptional.get();
@@ -66,7 +65,8 @@ public class UserServiceImpl implements UserService {
 
         Token newToken = new Token();
 
-        newToken.setValue(randomStringUtils.nextAlphanumeric(15));
+        newToken.setValue(randomStringUtils.nextAlphanumeric(30));
+//        newToken.setValue(jwtUtil.generateToken(savedUser.getEmail()));
         newToken.setExpireAt(expiryDate);
         newToken.setUser(savedUser);
 
