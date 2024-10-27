@@ -13,6 +13,8 @@ import java.util.List;
 @JsonDeserialize
 public class CustomUserDetails implements UserDetails {
 
+    private long userId;
+
     private String password;
 
     private String username;
@@ -37,6 +39,7 @@ public class CustomUserDetails implements UserDetails {
         this.enabled = true;
         this.username = user.getEmail();
         this.password = user.getHashPassword();
+        this.userId = user.getId();
 
         List<GrantedAuthority> grantedAuthorityList = new ArrayList<>();
 
@@ -80,6 +83,10 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public long getUserId() {
+        return userId;
     }
 
 }
